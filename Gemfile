@@ -54,7 +54,6 @@ gem 'turbolinks', '~> 2.5.3'
 gem 'uglifier', '>= 1.3.0'
 
 group :development do
-  gem 'foreman'
   gem 'web-console'
 end
 

@@ -2,89 +2,41 @@ version: '2'
 services:
   elasticsearch:
     image: 'elasticsearch:1.7'
+    network_mode: host
 
   memcached:
     image: 'memcached:1.4'
+    network_mode: host
 
-  database:
+  postgres:
     image: 'postgres:9.4'
+    network_mode: host
 
   redis:
     image: 'redis:3.2'
+    network_mode: host
 
   rails_app:
     depends_on:
       - 'elasticsearch'
       - 'memcached'
-      - 'database'
+      - 'postgres'
       - 'redis'
     build:
       context: ./
       dockerfile: Dockerfile
-    command: rails server -b 0.0.0.0
-    ports:
-      - '5000:5000'
-    links:
-      - elasticsearch:elasticsearch.service.classroom.internal
-      - database:database.service.classroom.internal
-      - memcached:memcached.service.classroom.internal
-    environment:
-      # Services
-      - DATABASE_HOST=database.service.classroom.internal
-      - ELASTICSEARCH_DEVELOPMENT_HOST=elasticsearch.service.classroom.internal
-      - MEMCACHEDCLOUD_SERVERS=memcached.service.classroom.internal
-      - REDIS_URL=redis.service.classroom.internal
-
-      # Development
-      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
-      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
-      - CLASSROOM_WEBHOOK_URL_PREFIX=${CLASSROOM_WEBHOOK_URL_PREFIX}
-      - NON_STAFF_GITHUB_ADMIN_IDS=${NON_STAFF_GITHUB_ADMIN_IDS}
-      - MOTD=${MOTD}
-      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
-
-      # Testing
-      - TEST_CLASSROOM_OWNER_GITHUB_ID=${TEST_CLASSROOM_OWNER_GITHUB_ID}
-      - TEST_CLASSROOM_OWNER_GITHUB_TOKEN=${TEST_CLASSROOM_OWNER_GITHUB_TOKEN}
-      - TEST_CLASSROOM_STUDENT_GITHUB_ID=${TEST_CLASSROOM_STUDENT_GITHUB_ID}
-      - TEST_CLASSROOM_STUDENT_GITHUB_TOKEN=${TEST_CLASSROOM_STUDENT_GITHUB_TOKEN}
-      - TEST_CLASSROOM_OWNER_ORGANIZATION_GITHUB_ID=${TEST_CLASSROOM_OWNER_ORGANIZATION_GITHUB_ID}
-      - TEST_CLASSROOM_OWNER_ORGANIZATION_GITHUB_LOGIN=${TEST_CLASSROOM_OWNER_ORGANIZATION_GITHUB_LOGIN}
+    command: rails server -p 5000 -b 0.0.0.0
+    network_mode: host
+    env_file: '.env'
 
   sidekiq:
     depends_on:
       - 'elasticsearch'
-      - 'database'
-      - 'redis'
       - 'memcached'
+      - 'postgres'
+      - 'redis'
     build:
       context: ./
       dockerfile: Dockerfile
     command: sidekiq -C config/sidekiq.yml
-    links:
-      - elasticsearch:elasticsearch.service.classroom.internal
-      - database:database.service.classroom.internal
-      - memcached:memcached.service.classroom.internal
-      - redis:redis.service.classroom.internal
-    environment:
-      # Services
-      - DATABASE_HOST=database.service.classroom.internal
-      - ELASTICSEARCH_DEVELOPMENT_HOST=elasticsearch.service.classroom.internal
-      - MEMCACHEDCLOUD_SERVERS=memcached.service.classroom.internal
-      - REDIS_URL=redis.service.classroom.internal
-
-      # Development
-      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
-      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
-      - CLASSROOM_WEBHOOK_URL_PREFIX=${CLASSROOM_WEBHOOK_URL_PREFIX}
-      - NON_STAFF_GITHUB_ADMIN_IDS=${NON_STAFF_GITHUB_ADMIN_IDS}
-      - MOTD=${MOTD}
-      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
-
-      # Testing
-      - TEST_CLASSROOM_OWNER_GITHUB_ID=${TEST_CLASSROOM_OWNER_GITHUB_ID}
-      - TEST_CLASSROOM_OWNER_GITHUB_TOKEN=${TEST_CLASSROOM_OWNER_GITHUB_TOKEN}
-      - TEST_CLASSROOM_STUDENT_GITHUB_ID=${TEST_CLASSROOM_STUDENT_GITHUB_ID}
-      - TEST_CLASSROOM_STUDENT_GITHUB_TOKEN=${TEST_CLASSROOM_STUDENT_GITHUB_TOKEN}
-      - TEST_CLASSROOM_OWNER_ORGANIZATION_GITHUB_ID=${TEST_CLASSROOM_OWNER_ORGANIZATION_GITHUB_ID}
-      - TEST_CLASSROOM_OWNER_ORGANIZATION_GITHUB_LOGIN=${TEST_CLASSROOM_OWNER_ORGANIZATION_GITHUB_LOGIN}
+    env_file: '.env'
