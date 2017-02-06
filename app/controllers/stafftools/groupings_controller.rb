@@ -5,6 +5,16 @@ module Stafftools
 
     def show; end
 
+    def destroy
+      org = @grouping.organization
+
+      GroupAssignment.where(grouping: @grouping).each(&:destroy)
+      @grouping.destroy
+
+      flash[:success] = 'Grouping was destroyed'
+      redirect_to stafftools_organization_path(org.id)
+    end
+
     private
 
     def set_grouping
