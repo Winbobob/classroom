@@ -2,10 +2,13 @@
 require 'rails_helper'
 
 RSpec.describe Stafftools::GroupingsController, type: :controller do
-  let(:user)         { GitHubFactory.create_owner_classroom_org.users.first }
-  let(:organization) { user.organizations.first                             }
-
+  let(:organization) { GitHubFactory.create_owner_classroom_org }
+  let(:user)         { organization.users.first }
   let(:grouping) { Grouping.create(organization: organization, title: 'Grouping 1') }
+
+  let(:group_assignment) {
+    GroupAssignment.new(creator: user, organization: organization, grouping: grouping)
+  }
 
   before(:each) do
     sign_in(user)
@@ -47,14 +50,9 @@ RSpec.describe Stafftools::GroupingsController, type: :controller do
 
     context 'as an authorized user' do
       before do
-        @group_assignment = GroupAssignment.create(creator: user,
-                               title: 'Learn Ruby',
-                               slug: 'learn-ruby',
-                               organization: organization,
-                               grouping: grouping,
-                               public_repo: true)
-
+        group_assignment.save
         user.update_attributes(site_admin: true)
+
         delete :destroy, params: {id: grouping.id }
       end
 
@@ -63,7 +61,7 @@ RSpec.describe Stafftools::GroupingsController, type: :controller do
       end
 
       it 'destroys group assignments' do
-        expect(GroupAssignment.find_by(id: @group_assignment.id)).to be_nil
+        expect(GroupAssignment.find_by(id: group_assignment.id)).to be_nil
       end
 
       it 'shows a success message' do

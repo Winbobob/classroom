@@ -8,11 +8,15 @@ module Stafftools
     def destroy
       org = @grouping.organization
 
-      GroupAssignment.where(grouping: @grouping).each(&:destroy)
-      @grouping.destroy
+      GroupAssignment.where(grouping: @grouping).destroy_all
 
-      flash[:success] = 'Grouping was destroyed'
-      redirect_to stafftools_organization_path(org.id)
+      if @grouping.destroy
+        flash[:success] = 'Grouping was destroyed'
+        redirect_to stafftools_organization_path(org.id)
+      else
+        flash[:error] = 'Grouping was not destroyed'
+        render :show
+      end
     end
 
     private
