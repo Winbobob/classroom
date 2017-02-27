@@ -6,7 +6,9 @@ RSpec.describe Stafftools::GroupingsController, type: :controller do
   let(:user)         { organization.users.first }
   let(:grouping)     { create(:grouping, organization: organization) }
 
-  let(:group_assignment) { create(:group_assignment, organization: organization, grouping: grouping) }
+  let(:group_assignment) do
+    create(:group_assignment, title: 'Learning Golang', organization: organization, grouping: grouping)
+  end
 
   before(:each) do
     sign_in_as(user)
