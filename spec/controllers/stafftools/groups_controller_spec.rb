@@ -2,8 +2,8 @@
 require 'rails_helper'
 
 RSpec.describe Stafftools::GroupsController, type: :controller do
-  let(:user)         { classroom_teacher }
-  let(:organization) { classroom_org     }
+  let(:organization) { classroom_org }
+  let(:user)         { organization.users.first }
 
   let(:grouping) { create(:grouping, organization: organization)         }
   let(:group)    { Group.create(grouping: grouping, title: 'The B Team') }
@@ -12,7 +12,7 @@ RSpec.describe Stafftools::GroupsController, type: :controller do
     sign_in_as(user)
   end
 
-  after do
+  after(:each) do
     Group.destroy_all
   end
 

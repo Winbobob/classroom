@@ -2,13 +2,11 @@
 require 'rails_helper'
 
 RSpec.describe Stafftools::GroupingsController, type: :controller do
-  let(:organization) { GitHubFactory.create_owner_classroom_org }
+  let(:organization) { classroom_org }
   let(:user)         { organization.users.first }
-  let(:grouping) { Grouping.create(organization: organization, title: 'Grouping 1') }
+  let(:grouping)     { create(:grouping, organization: organization) }
 
-  let(:group_assignment) {
-    GroupAssignment.new(creator: user, organization: organization, grouping: grouping)
-  }
+  let(:group_assignment) { create(:group_assignment, organization: organization, grouping: grouping) }
 
   before(:each) do
     sign_in_as(user)
@@ -50,10 +48,8 @@ RSpec.describe Stafftools::GroupingsController, type: :controller do
 
     context 'as an authorized user' do
       before do
-        group_assignment.save
         user.update_attributes(site_admin: true)
-
-        delete :destroy, params: {id: grouping.id }
+        delete :destroy, params: { id: grouping.id }
       end
 
       it 'destroys grouping' do

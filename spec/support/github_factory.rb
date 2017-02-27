@@ -21,6 +21,6 @@ module GitHubFactory
       users: [classroom_teacher]
     }
 
-    @classroom_org = create(:organization, options)
+    @classroom_org = Organization.create(options)
   end
 end
